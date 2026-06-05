@@ -10,6 +10,8 @@ from datetime import datetime
 import time
 import os
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 import database
 import scrapers
 import anomaly_detector
@@ -17,6 +19,7 @@ import test_data
 
 # Global test data provider - created once and reused
 _test_provider = None
+scheduler = None
 
 def get_test_provider():
     """Get or create the singleton test data provider."""
@@ -98,20 +101,67 @@ def show_history(limit=10):
         if analysis:
             print(f"Analysis: {analysis}\n")
 
+def schedule_continuous_checks(use_test_data=False, interval_minutes=15, duration_minutes=None):
+    """Start background scheduler for continuous price checks."""
+    global scheduler
+    
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=run_single_check,
+        args=(use_test_data,),
+        trigger="interval",
+        minutes=interval_minutes,
+        id="price_check_job",
+        name="Price Check Job",
+        replace_existing=True
+    )
+    
+    scheduler.start()
+    print(f"\nScheduler started. Running price checks every {interval_minutes} minute(s).")
+    print("Press Ctrl+C to stop.\n")
+    
+    start_time = time.time()
+    try:
+        while True:
+            time.sleep(1)
+            
+            if duration_minutes:
+                elapsed = (time.time() - start_time) / 60
+                if elapsed >= duration_minutes:
+                    print(f"\nDuration limit ({duration_minutes} minutes) reached. Shutting down...")
+                    break
+    except KeyboardInterrupt:
+        print("\nShutting down scheduler...")
+    finally:
+        scheduler.shutdown()
+        show_history()
+
 def main():
     parser = argparse.ArgumentParser(
         description="Flight Price Anomaly Detection Agent"
     )
     parser.add_argument(
         "--mode",
-        choices=["check", "history", "demo"],
+        choices=["check", "history", "demo", "continuous"],
         default="check",
-        help="Mode: check (run one price check), history (show recent checks), demo (run with test data)"
+        help="Mode: check (single check), history (show recent), demo (5 test checks), continuous (scheduled checks)"
     )
     parser.add_argument(
         "--test",
         action="store_true",
         help="Use test data instead of live scraping"
+    )
+    parser.add_argument(
+        "--interval",
+        type=int,
+        default=15,
+        help="Interval in minutes for continuous mode (default: 15)"
+    )
+    parser.add_argument(
+        "--duration",
+        type=int,
+        default=None,
+        help="Run for specified number of minutes, then auto-stop (optional)"
     )
     
     args = parser.parse_args()
@@ -130,6 +180,13 @@ def main():
                 time.sleep(1)
         
         show_history()
+    
+    elif args.mode == "continuous":
+        database.init_db()
+        print("Running initial price check...")
+        run_single_check(use_test_data=args.test)
+        schedule_continuous_checks(use_test_data=args.test, interval_minutes=args.interval, duration_minutes=args.duration)
+    
     else:
         database.init_db()
         
