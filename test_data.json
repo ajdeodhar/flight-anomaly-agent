@@ -1,0 +1,62 @@
+[
+  {
+    "economy": 45000,
+    "premium": 48000,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 46500,
+    "premium": 49200,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 44800,
+    "premium": 42500,
+    "label": "ANOMALY: Premium cheaper"
+  },
+  {
+    "economy": 47000,
+    "premium": 50100,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 45500,
+    "premium": 45200,
+    "label": "ANOMALY: Premium slightly cheaper"
+  },
+  {
+    "economy": 48000,
+    "premium": 51200,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 46000,
+    "premium": 49500,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 45200,
+    "premium": 43800,
+    "label": "ANOMALY: Premium cheaper"
+  },
+  {
+    "economy": 47500,
+    "premium": 50800,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 44500,
+    "premium": 44200,
+    "label": "ANOMALY: Premium slightly cheaper"
+  },
+  {
+    "economy": 46800,
+    "premium": 49900,
+    "label": "Normal pricing"
+  },
+  {
+    "economy": 45700,
+    "premium": 48200,
+    "label": "Normal pricing"
+  }
+]
