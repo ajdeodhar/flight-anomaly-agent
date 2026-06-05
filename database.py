@@ -32,7 +32,8 @@ def init_db():
             difference_pct REAL NOT NULL,
             alerted BOOLEAN DEFAULT 0,
             alert_type TEXT,
-            notes TEXT
+            notes TEXT,
+            analysis TEXT
         )
     """)
     
@@ -55,15 +56,15 @@ def save_price_check(economy_price, premium_price, anomaly_detected=False, anoma
     
     return price_check_id
 
-def save_anomaly(economy_price, premium_price, difference_pct, alert_type=None, notes=None):
+def save_anomaly(economy_price, premium_price, difference_pct, alert_type=None, notes=None, analysis=None):
     """Save an anomaly to the anomalies table."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
     cursor.execute("""
-        INSERT INTO anomalies (economy_price, premium_price, difference_pct, alert_type, notes)
-        VALUES (?, ?, ?, ?, ?)
-    """, (economy_price, premium_price, difference_pct, alert_type, notes))
+        INSERT INTO anomalies (economy_price, premium_price, difference_pct, alert_type, notes, analysis)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (economy_price, premium_price, difference_pct, alert_type, notes, analysis))
     
     conn.commit()
     anomaly_id = cursor.lastrowid

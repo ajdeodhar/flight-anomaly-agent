@@ -8,6 +8,7 @@ import sys
 import argparse
 from datetime import datetime
 import time
+import os
 
 import database
 import scrapers
@@ -92,8 +93,10 @@ def show_history(limit=10):
         return
     
     for anomaly in anomalies:
-        anom_id, timestamp, economy, premium, diff_pct, alerted, alert_type, notes = anomaly
+        anom_id, timestamp, economy, premium, diff_pct, alerted, alert_type, notes, analysis = anomaly
         print(f"{timestamp} | Economy ₹{economy:.0f} | Premium ₹{premium:.0f} | Diff: {diff_pct:.2f}%")
+        if analysis:
+            print(f"Analysis: {analysis}\n")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -113,16 +116,11 @@ def main():
     
     args = parser.parse_args()
     
-    database.init_db()
-    
-    if args.mode == "check":
-        run_single_check(use_test_data=args.test)
-    
-    elif args.mode == "history":
-        show_history()
-    
-    elif args.mode == "demo":
+    if args.mode == "demo":
+        if os.path.exists("flight_prices.db"):
+            os.remove("flight_prices.db")
         print("DEMO MODE: Running with test data")
+        database.init_db()
         test_data.create_test_data()
         
         for i in range(5):
@@ -132,6 +130,14 @@ def main():
                 time.sleep(1)
         
         show_history()
+    else:
+        database.init_db()
+        
+        if args.mode == "check":
+            run_single_check(use_test_data=args.test)
+        
+        elif args.mode == "history":
+            show_history()
 
 if __name__ == "__main__":
     main()
